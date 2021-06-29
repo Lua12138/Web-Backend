@@ -4,8 +4,8 @@
         <aside :class="asideClassName">
             <!-- logo -->
             <div class="logo-c">
-                <img src="../assets/imgs/logo.png" alt="logo" class="logo">
-                <span v-show="isShowAsideTitle">后台管理系统</span>
+                <img src="../../public/yu.png" alt="logo" class="logo">
+                <span v-show="isShowAsideTitle">域道科技</span>
             </div>
             <!-- 菜单栏 -->
             <Menu class="menu" ref="asideMenu" theme="dark" width="100%" @on-select="selectMenuCallback"
@@ -89,13 +89,14 @@
                     </div>
                     <div class="h-right">
                         <!-- 消息 -->
-                        <div class="notice-c" @click="info" title="查看新消息">
+                        <!-- <div class="notice-c" @click="info" title="查看新消息">
                             <div :class="{newMsg: hasNewMsg}"></div>
                             <Icon type="ios-notifications-outline" />
-                        </div>
+                        </div> -->
                         <!-- 用户头像 -->
                         <div class="user-img-c">
-                            <img :src="userImg">
+                            <img src="../../public/yu.png" alt="">
+                            <!-- <img :src="userImg"> -->
                         </div>
                         <!-- 下拉菜单 -->
                         <Dropdown trigger="click" @on-click="userOperate" @on-visible-change="showArrow">
@@ -106,8 +107,8 @@
                             </div>
                             <DropdownMenu slot="list">
                                 <!-- name标识符 -->
-                                <DropdownItem name="1">修改密码</DropdownItem>
-                                <DropdownItem name="2">基本资料</DropdownItem>
+                                <!-- <DropdownItem name="1">修改密码</DropdownItem> -->
+                                <DropdownItem name="2">修改接口地址</DropdownItem>
                                 <DropdownItem divided  name="3">退出登陆</DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
@@ -185,7 +186,7 @@ export default {
             userName: '',
             userImg: '',
             // 主页路由名称
-            home: 'home',
+            home: 'devGroupManage',
         }
     },
     mounted() {
@@ -342,8 +343,8 @@ export default {
                     this.gotoPage('password')
                     break
                 case '2':
-                    // 基本资料
-                    this.gotoPage('userinfo')
+                    //修改接口地址
+                    this.urlClick()
                     break
                 case '3':
                     resetTokenAndClearUser()
@@ -351,6 +352,20 @@ export default {
                     break
             }
         },
+				urlClick(){
+					this.$prompt('请填写接口地址', '提示', {
+					  confirmButtonText: '确定',
+					  cancelButtonText: '取消',
+					}).then(({ value }) => {
+					  localStorage.setItem('YUDAO_URL',value)
+						location.reload();
+					}).catch(() => {
+					  this.$message({
+					    type: 'info',
+					    message: '取消输入'
+					  });       
+					});
+				},
         // 控制用户三角箭头显示状态
         showArrow(flag) {
             this.arrowUp = flag

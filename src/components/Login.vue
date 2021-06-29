@@ -12,26 +12,31 @@
                 <p class="error">{{pwdError}}</p>
             </div>
             <Button :loading="isShowLoading" class="submit" type="primary" @click="submit">登陆</Button>
-            <p class="account"><span @click="register">注册账号</span> | <span @click="forgetPwd">忘记密码</span></p>
+            <p class="account"><span
+						 :class="{'red':!isUrl}"
+						 @click="urlClick">修改接口地址</span></p>
         </div>
     </div>
 </template>
 
 <script>
+	import {auth} from '@/api/index.js'
 export default {
     name: 'login',
     data() {
         return {
-            account: 'admin',
-            pwd: 'admin',
+            account: '',//admin
+            pwd: '',//a.123!
             accountError: '',
             pwdError: '',
             isShowLoading: false,
             bg: {},
+						isUrl:localStorage.getItem('YUDAO_URL')
         }
     },
     created() {
         this.bg.backgroundImage = 'url(' + require('../assets/imgs/bg0' + new Date().getDay() + '.jpg') + ')'
+        this.bg.backgroundSize = '100% 100%'
     },
     watch: {
         $route: {
@@ -44,40 +49,58 @@ export default {
     methods: {
         verifyAccount() {
             if (this.account !== 'admin') {
-                this.accountError = '账号为admin'
+                this.accountError = ''
             } else {
                 this.accountError = ''
             }
         },
         verifyPwd() {
             if (this.pwd !== 'admin') {
-                this.pwdError = '密码为admin'
+                this.pwdError = ''
             } else {
                 this.pwdError = ''
             }
         },
-        register() {
-
-        },
-        forgetPwd() {
-
-        },
+        urlClick(){
+					this.$prompt('请填写接口地址', '提示', {
+					  confirmButtonText: '确定',
+					  cancelButtonText: '取消',
+					}).then(({ value }) => {
+					  localStorage.setItem('YUDAO_URL',value)
+						location.reload();
+					}).catch(() => {
+					  this.$message({
+					    type: 'info',
+					    message: '取消输入'
+					  });       
+					});
+				},
         submit() {
-            if (this.account === 'admin' && this.pwd === 'admin') {
-                this.isShowLoading = true
-                // 登陆成功 设置用户信息
-                localStorage.setItem('userImg', 'https://avatars3.githubusercontent.com/u/22117876?s=460&v=4')
-                localStorage.setItem('userName', '小明')
-                // 登陆成功 假设这里是后台返回的 token
-                localStorage.setItem('token', 'i_am_token')
-                this.$router.push({ path: this.redirect || '/' })
+            if (this.account !== '' && this.pwd !== '') {
+							auth({
+								username:this.account,
+								password:this.pwd
+							}).then(res => {
+								if(res.status === 0){
+									this.isShowLoading = true
+									// 登陆成功 设置用户信息
+									localStorage.setItem('userImg', 'https://avatars3.githubusercontent.com/u/22117876?s=460&v=4')
+									localStorage.setItem('userName', '域道科技')
+									// 登陆成功 假设这里是后台返回的 token
+									localStorage.setItem('token', 'f12138:'+res.content)
+									console.log(this.redirect || '/')
+									this.$router.push({ path: this.redirect || '/' })
+								}else{
+									this.$message.error(res.msg)
+								}
+							})
             } else {
-                if (this.account !== 'admin') {
-                    this.accountError = '账号为admin'
+                if (this.account === '') {
+                    this.accountError = '请输入账号'
                 }
 
-                if (this.pwd !== 'admin') {
-                    this.pwdError = '密码为admin'
+                if (this.pwd === '') {
+                    this.pwdError = '请输入密码'
                 }
             }
         },
@@ -142,6 +165,9 @@ export default {
 }
 .login-vue .account span {
     cursor: pointer;
+}
+.login-vue .account .red {
+    color: red;
 }
 .login-vue .ivu-icon {
     color: #eee;
